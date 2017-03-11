@@ -1,0 +1,30 @@
+<h2>Listing Accounts</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>First name</th>
+      <th>Last name</th>
+      <th>Email</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for account <- @accounts do %>
+    <tr>
+      <td><%= account.first_name %></td>
+      <td><%= account.last_name %></td>
+      <td><%= account.email %></td>
+
+      <td class="text-right">
+        <span><%= link "Show", to: account_path(@conn, :show, account), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Edit", to: account_path(@conn, :edit, account), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Delete", to: account_path(@conn, :delete, account), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Account", to: account_path(@conn, :new) %></span>
