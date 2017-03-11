@@ -22,9 +22,4 @@ defmodule Profilex.Web.Router do
 
     resources "/accounts", AccountController
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", Profilex.Web do
-  #   pipe_through :api
-  # end
 end
