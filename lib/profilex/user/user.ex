@@ -153,7 +153,7 @@ defmodule Profilex.User do
   defp new_account_changeset(%Account{} = account, attrs) do
     account
     |> cast(attrs, [:first_name, :last_name, :email])
-    |> validate_required([:first_name, :last_name, :email])
+    |> validate_required([:email])
     |> put_change(:password_digest,
                   hashed_password(Map.get(attrs, :password)))
   end
