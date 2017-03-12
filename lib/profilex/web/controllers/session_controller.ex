@@ -4,7 +4,7 @@ defmodule Profilex.Web.SessionController do
   alias Profilex.User
 
   def new(conn, _params) do
-    changeset = User.change_session(%User.Session{})
+    changeset = User.prepare_session(%User.Session{})
     render(conn, "new.html", changeset: changeset)
   end
 

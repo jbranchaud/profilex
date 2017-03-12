@@ -69,6 +69,18 @@ defmodule Profilex.User do
     |> create_account()
   end
 
+  @doc """
+  Signs in a account.
+
+  ## Examples
+
+      iex> signin_account(%{field: value})
+      {:ok, %Account{}}
+
+      iex> signin_account(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
   def signin_account(attrs) do
     %Session{}
     |> session_changeset(attrs)
@@ -122,23 +134,23 @@ defmodule Profilex.User do
     account_changeset(account, %{})
   end
 
-  def account_changeset(%Account{} = account, attrs) do
+  defp account_changeset(%Account{} = account, attrs) do
     account
     |> cast(attrs, [:first_name, :last_name, :email])
     |> validate_required([:first_name, :last_name, :email])
   end
 
-  def change_session(%Session{} = session) do
+  def prepare_session(%Session{} = session) do
     session_changeset(%Session{} = session, %{})
   end
 
-  def session_changeset(%Session{} = session, attrs) do
+  defp session_changeset(%Session{} = session, attrs) do
     session
     |> cast(attrs, [:email, :password])
     |> validate_required([:email, :password])
   end
 
-  def new_account_changeset(%Account{} = account, attrs) do
+  defp new_account_changeset(%Account{} = account, attrs) do
     account
     |> cast(attrs, [:first_name, :last_name, :email])
     |> validate_required([:first_name, :last_name, :email])
@@ -146,13 +158,13 @@ defmodule Profilex.User do
                   hashed_password(Map.get(attrs, :password)))
   end
 
-  def registration_changeset(registration, attrs) do
+  defp registration_changeset(registration, attrs) do
     registration
     |> cast(attrs, [:first_name, :last_name, :email])
     |> validate_required([:email])
   end
 
-  def password_changeset(%Registration{} = registration, attrs) do
+  defp password_changeset(%Registration{} = registration, attrs) do
     registration
     |> cast(attrs, [:password, :password_confirmation])
     |> validate_required([:password, :password_confirmation])
