@@ -64,7 +64,6 @@ defmodule Profilex.User do
 
   def register_account(attrs) do
     %Registration{}
-    |> password_changeset(attrs)
     |> registration_changeset(attrs)
     |> create_account()
   end
@@ -154,22 +153,32 @@ defmodule Profilex.User do
     account
     |> cast(attrs, [:first_name, :last_name, :email])
     |> validate_required([:email])
-    |> put_change(:password_digest,
-                  hashed_password(Map.get(attrs, :password)))
+    |> password_digest_changeset(attrs)
   end
 
   defp registration_changeset(registration, attrs) do
     registration
     |> cast(attrs, [:first_name, :last_name, :email])
     |> validate_required([:email])
+    |> password_changeset(attrs)
   end
 
-  defp password_changeset(%Registration{} = registration, attrs) do
+  defp password_changeset(registration, attrs) do
     registration
     |> cast(attrs, [:password, :password_confirmation])
     |> validate_required([:password, :password_confirmation])
     |> validate_length(:password, min: 8)
     |> validate_confirmation(:password)
+  end
+
+  defp password_digest_changeset(registration, attrs) do
+    case registration do
+      %Ecto.Changeset{valid?: true} ->
+        registration
+        |> put_change(:password_digest, hashed_password(Map.get(attrs, :password)))
+      _ ->
+        registration
+    end
   end
 
   defp hashed_password(nil), do: nil
