@@ -62,6 +62,25 @@ defmodule Profilex.User do
     |> Repo.insert()
   end
 
+  defp new_account_changeset(%Account{} = account, attrs) do
+    account
+    |> cast(attrs, [:first_name, :last_name, :email])
+    |> validate_required([:email])
+    |> password_digest_changeset(attrs)
+  end
+
+  @doc """
+  Registers a account.
+
+  ## Examples
+
+      iex> register_account(%{field: value})
+      {:ok, %Account{}}
+
+      iex> register_account(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
   def register_account(attrs) do
     %Registration{}
     |> registration_changeset(attrs)
@@ -139,6 +158,15 @@ defmodule Profilex.User do
     |> validate_required([:first_name, :last_name, :email])
   end
 
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking session changes.
+
+  ## Examples
+
+      iex> prepare_session(session)
+      %Ecto.Changeset{source: %Session{}}
+
+  """
   def prepare_session(%Session{} = session) do
     session_changeset(session, %{})
   end
@@ -149,13 +177,15 @@ defmodule Profilex.User do
     |> validate_required([:email, :password])
   end
 
-  defp new_account_changeset(%Account{} = account, attrs) do
-    account
-    |> cast(attrs, [:first_name, :last_name, :email])
-    |> validate_required([:email])
-    |> password_digest_changeset(attrs)
-  end
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking registration changes.
 
+  ## Examples
+
+      iex> prepare_registration(session)
+      %Ecto.Changeset{source: %Registration{}}
+
+  """
   def prepare_registration(%Registration{} = registration) do
     registration_changeset(registration, %{})
   end
