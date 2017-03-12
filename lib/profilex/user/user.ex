@@ -175,9 +175,12 @@ defmodule Profilex.User do
       true ->
         {:ok, account}
       false ->
+        invalid_session =
+          session
+          |> add_error(:password, "password and email do not match")
         {
           :error,
-          %{add_error(session, :password, "password and email do not match") | action: "insert"}
+          %{invalid_session | action: "insert"}
         }
     end
   end
