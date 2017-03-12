@@ -4,11 +4,11 @@ defmodule Profilex.Web.RegistrationController do
   alias Profilex.User
 
   def new(conn, _params) do
-    changeset = User.change_account(%Profilex.User.Account{})
+    changeset = User.prepare_registration(%Profilex.User.Registration{})
     render(conn, "new.html", changeset: changeset)
   end
 
-  def create(conn, %{"account" => account_params}) do
+  def create(conn, %{"registration" => account_params}) do
     case User.register_account(account_params) do
       {:ok, account} ->
         conn
@@ -17,8 +17,5 @@ defmodule Profilex.Web.RegistrationController do
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
-  end
-  def create(conn, %{"registration" => account_params} = params) do
-    create(conn, Map.put(params, "account", account_params))
   end
 end

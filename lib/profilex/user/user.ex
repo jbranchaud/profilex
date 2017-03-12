@@ -156,6 +156,10 @@ defmodule Profilex.User do
     |> password_digest_changeset(attrs)
   end
 
+  def prepare_registration(%Registration{} = registration) do
+    registration_changeset(registration, %{})
+  end
+
   defp registration_changeset(registration, attrs) do
     registration
     |> cast(attrs, [:first_name, :last_name, :email])
