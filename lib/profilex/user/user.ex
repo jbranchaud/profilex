@@ -140,7 +140,7 @@ defmodule Profilex.User do
   end
 
   def prepare_session(%Session{} = session) do
-    session_changeset(%Session{} = session, %{})
+    session_changeset(session, %{})
   end
 
   defp session_changeset(%Session{} = session, attrs) do
