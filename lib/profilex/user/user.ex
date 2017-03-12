@@ -6,8 +6,7 @@ defmodule Profilex.User do
   import Ecto.{Query, Changeset}, warn: false
   alias Profilex.Repo
 
-  alias Profilex.User.Account
-  alias Profilex.User.Registration
+  alias Profilex.User.{Account,Registration,Session}
 
   @doc """
   Returns the list of accounts.
@@ -70,6 +69,12 @@ defmodule Profilex.User do
     |> create_account()
   end
 
+  def signin_account(attrs) do
+    %Session{}
+    |> session_changeset(attrs)
+    |> check_password(attrs)
+  end
+
   @doc """
   Updates a account.
 
@@ -123,6 +128,16 @@ defmodule Profilex.User do
     |> validate_required([:first_name, :last_name, :email])
   end
 
+  def change_session(%Session{} = session) do
+    session_changeset(%Session{} = session, %{})
+  end
+
+  def session_changeset(%Session{} = session, attrs) do
+    session
+    |> cast(attrs, [:email, :password])
+    |> validate_required([:email, :password])
+  end
+
   def new_account_changeset(%Account{} = account, attrs) do
     account
     |> cast(attrs, [:first_name, :last_name, :email])
@@ -148,5 +163,29 @@ defmodule Profilex.User do
   defp hashed_password(nil), do: nil
   defp hashed_password(password) do
     Comeonin.Bcrypt.hashpwsalt(password)
+  end
+
+  defp check_password(%Ecto.Changeset{valid?: false} = session, _attrs) do
+    {:error, %{session | action: "insert"}}
+  end
+  defp check_password(session, %{"password" => password, "email" => email}) do
+    account = Repo.get_by(Account, email: email)
+
+    case authenticate(account, password) do
+      true ->
+        {:ok, account}
+      false ->
+        {
+          :error,
+          %{add_error(session, :password, "password and email do not match") | action: "insert"}
+        }
+    end
+  end
+
+  defp authenticate(account, password) do
+    case account do
+      nil -> false
+      _   -> Comeonin.Bcrypt.checkpw(password, account.password_digest)
+    end
   end
 end

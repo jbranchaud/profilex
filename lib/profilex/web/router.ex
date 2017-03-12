@@ -19,6 +19,8 @@ defmodule Profilex.Web.Router do
     get "/", PageController, :index
     get "/signup", RegistrationController, :new
     post "/signup", RegistrationController, :create
+    get "/signin", SessionController, :new
+    post "/signin", SessionController, :create
 
     resources "/accounts", AccountController
   end
