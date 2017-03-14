@@ -3,6 +3,8 @@ defmodule Profilex.Web.AccountController do
 
   alias Profilex.User
 
+  plug :authenticate_user when action in [:edit, :update, :delete]
+
   def index(conn, _params) do
     accounts = User.list_accounts()
     render(conn, "index.html", accounts: accounts)
@@ -39,5 +41,14 @@ defmodule Profilex.Web.AccountController do
     conn
     |> put_flash(:info, "Account deleted successfully.")
     |> redirect(to: account_path(conn, :index))
+  end
+
+  defp authenticate_user(%{params: %{"id" => id}} = conn, _opts) do
+    current_user_id = conn |> get_session(:current_user) |> Map.get(:id) |> to_string()
+
+    case current_user_id do
+      ^id -> conn
+      _   -> redirect(conn, to: page_path(conn, :index)) |> halt()
+    end
   end
 end
