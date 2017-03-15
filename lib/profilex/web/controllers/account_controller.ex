@@ -27,13 +27,15 @@ defmodule Profilex.Web.AccountController do
   def update(conn, %{"id" => id, "account" => account_params}) do
     account = User.get_account!(id)
 
-    case User.update_account(account, account_params) do
+    case update_account(conn, account, account_params) do
       {:ok, account} ->
         conn
         |> put_flash(:info, "Account updated successfully.")
         |> redirect(to: account_path(conn, :show, account))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", account: account, changeset: changeset)
+      {:error, error_type} ->
+        redirect(conn, to: "/")
     end
   end
 
@@ -53,6 +55,20 @@ defmodule Profilex.Web.AccountController do
       :ok ->
         account_changeset = User.change_account(account)
         {:ok, current_user, account_changeset}
+      {:error, error_type} ->
+        {:error, error_type}
+    end
+  end
+
+  defp update_account(conn, account, account_params) do
+    current_user = get_session(conn, :current_user)
+
+    case Profilex.User.Auth.can(:update_account, current_user, account) do
+      :ok ->
+        case User.update_account(account, account_params) do
+          {:ok, account} -> {:ok, account}
+          {:error, changeset} -> {:error, changeset}
+        end
       {:error, error_type} ->
         {:error, error_type}
     end
