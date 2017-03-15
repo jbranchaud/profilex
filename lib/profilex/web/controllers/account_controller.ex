@@ -41,11 +41,15 @@ defmodule Profilex.Web.AccountController do
 
   def delete(conn, %{"id" => id}) do
     account = User.get_account!(id)
-    {:ok, _account} = User.delete_account(account)
 
-    conn
-    |> put_flash(:info, "Account deleted successfully.")
-    |> redirect(to: account_path(conn, :index))
+    case delete_account(conn, account) do
+      :ok ->
+        conn
+        |> put_flash(:info, "Account deleted successfully.")
+        |> redirect(to: account_path(conn, :index))
+      {:error, error_type} ->
+        redirect(conn, to: "/")
+    end
   end
 
   defp edit_account(conn, account) do
@@ -67,6 +71,20 @@ defmodule Profilex.Web.AccountController do
       :ok ->
         case User.update_account(account, account_params) do
           {:ok, account} -> {:ok, account}
+          {:error, changeset} -> {:error, changeset}
+        end
+      {:error, error_type} ->
+        {:error, error_type}
+    end
+  end
+
+  defp delete_account(conn, account) do
+    current_user = get_session(conn, :current_user)
+
+    case Profilex.User.Auth.can(:delete_account, current_user, account) do
+      :ok ->
+        case User.delete_account(account) do
+          {:ok, _account} -> :ok
           {:error, changeset} -> {:error, changeset}
         end
       {:error, error_type} ->
