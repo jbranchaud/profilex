@@ -3,8 +3,6 @@ defmodule Profilex.Web.AccountController do
 
   alias Profilex.User
 
-  plug :authenticate_user when action in [:edit, :update, :delete]
-
   def index(conn, _params) do
     accounts = User.list_accounts()
     render(conn, "index.html", accounts: accounts)
@@ -17,8 +15,13 @@ defmodule Profilex.Web.AccountController do
 
   def edit(conn, %{"id" => id}) do
     account = User.get_account!(id)
-    changeset = User.change_account(account)
-    render(conn, "edit.html", account: account, changeset: changeset)
+
+    case edit_account(conn, account) do
+      {:ok, account, changeset} ->
+        render(conn, "edit.html", account: account, changeset: changeset)
+      {:error, error} ->
+        redirect(conn, to: "/")
+    end
   end
 
   def update(conn, %{"id" => id, "account" => account_params}) do
@@ -43,12 +46,15 @@ defmodule Profilex.Web.AccountController do
     |> redirect(to: account_path(conn, :index))
   end
 
-  defp authenticate_user(%{params: %{"id" => id}} = conn, _opts) do
-    current_user_id = conn |> get_session(:current_user) |> Map.get(:id) |> to_string()
+  defp edit_account(conn, account) do
+    current_user = get_session(conn, :current_user)
 
-    case current_user_id do
-      ^id -> conn
-      _   -> redirect(conn, to: page_path(conn, :index)) |> halt()
+    case Profilex.User.Auth.can(:edit_account, current_user, account) do
+      :ok ->
+        account_changeset = User.change_account(account)
+        {:ok, current_user, account_changeset}
+      {:error, error_type} ->
+        {:error, error_type}
     end
   end
 end
